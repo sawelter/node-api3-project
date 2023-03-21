@@ -22,16 +22,35 @@ async function validateUserId(req, res, next) {
   }
 }
 
-function validateUser(req, res, next) {
-  // DO YOUR MAGIC
+async function validateUser(req, res, next) {
+  const { name } = req.body;
+
+  if(!name) {
+    res.status(400).json({ message: "missing required name field" });
+  }
+
+  try {
+    const users = await Users.get();
+    for(let i = 0; i < users.length; i++) {
+      if(users[i].name === name) {
+        res.status(400).json({message: "user already exists"});
+      }
+    }
+    next();
+  } catch(err) {
+    next(err);
+  }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
 }
 
-// do not forget to expose these functions to other modules
+
+
 module.exports = {
   logger, 
-  validateUserId
+  validateUserId, 
+  validateUser,
+  validatePost
 }
