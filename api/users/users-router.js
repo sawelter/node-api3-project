@@ -44,7 +44,6 @@ router.put('/:id', [mid.logger, mid.validateUserId, mid.validateUser], (req, res
 
 
 // RETURN THE FRESHLY DELETED USER OBJECT
-
 router.delete('/:id', [mid.logger, mid.validateUserId], async (req, res, next) => {
   const { id } = req.params;
   const user = await Users.getById(id);
@@ -57,13 +56,27 @@ router.delete('/:id', [mid.logger, mid.validateUserId], async (req, res, next) =
 
 
 // RETURN THE ARRAY OF USER POSTS
-router.get('/:id/posts', [mid.logger, mid.validateUserId], (req, res) => {
+router.get('/:id/posts', [mid.logger, mid.validateUserId], async (req, res, next) => {
+  const { id } = req.params;
+  Posts.get()
+    .then(posts => {
+      res.status(200).json(posts.filter(post => {
+        return Number(post.user_id) === Number(id);
+      }))
+    })
+    .catch(next);
 });
 
 
 // RETURN THE NEWLY CREATED USER POST
-router.post('/:id/posts', [mid.logger, mid.validateUserId, mid.validatePost], (req, res) => {
-
+router.post('/:id/posts', [mid.logger, mid.validateUserId, mid.validatePost], (req, res, next) => {
+  const { id } = req.params;
+  const { text } = req.body;
+  Posts.insert({ user_id: id, text: text})
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(next);
 });
 
 
