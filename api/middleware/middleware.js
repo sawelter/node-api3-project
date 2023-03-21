@@ -1,10 +1,25 @@
+const Users = require('../users/users-model.js')
+
+
 function logger(req, res, next) {
-  console.log(`[${new Date().toISOString()}] ${req.method} to ${req.url} ${req.get('Origin')}`);
+  console.log(`${req.method} call made to ${req.url} at ${new Date().toISOString()}`)
   next();
 }
 
-function validateUserId(req, res, next) {
+async function validateUserId(req, res, next) {
   // DO YOUR MAGIC
+  const { id } = req.params;
+  try {
+    const user = await Users.getById(id);
+    if(user) {
+      req.user = user;
+      next();
+    } else {
+      res.status(404).json({message: `user not found`})
+    }
+  } catch (err) {
+    next(err);
+  }
 }
 
 function validateUser(req, res, next) {
@@ -17,8 +32,6 @@ function validatePost(req, res, next) {
 
 // do not forget to expose these functions to other modules
 module.exports = {
-  logger,
-  validateUserId,
-  validateUser,
-  validatePost
+  logger, 
+  validateUserId
 }
